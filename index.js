@@ -1,32 +1,19 @@
-import * as http from "http";
-import * as url from "url";
-import * as fs from "fs/promises";
+import express from "express";
+import path from "path";
 
-const server = http.createServer(async (req, res) => {
-  const query = url.parse(req.url, true);
+const app = express();
 
-  let fileName = `.${query.pathname}.html`;
+app.use(express.static("public"));
 
-  if (fileName === "./.html") {
-    fileName = "./index.html";
-  }
-
-  try {
-    const data = await fs.readFile(fileName, "utf-8");
-    res.writeHead(200, { "Content-Type": "text/html" });
-    res.write(data);
-  } catch (error) {
-    res.writeHead(404, { "Content-Type": "text/html" });
-    const data404 = await fs.readFile("./404.html", "utf-8");
-    res.write(data404);
-  }
-
-  res.end();
+// 404 handler
+app.use(async (req, res) => {
+  res.status(404);
+  res.sendFile(path.resolve("public/404.html"));
 });
 
 const hostName = "localhost";
 const port = 8080;
 
-server.listen(port, () => {
+app.listen(port, () => {
   console.log(`Server running at http://${hostName}:${port}/`);
 });
